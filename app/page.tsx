@@ -1,33 +1,72 @@
 "use client";
 
+import Searcher from "@/components/search/Searcher";
+import authStore from "@/store/authStore";
+import axios from "axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-interface Result {
-  poster_path: string;
-  title: string;
-}
 
 export default function Home() {
-  const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID as string;
+  const CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET as string;
 
-  const [resultList, setResultList] = useState<Result[]>([]);
-  const [keyword, setKeyword] = useState("");
+  const [result, setResult] = useState([]);
+  const setToken = authStore((state) => state.setToken);
+  const token = authStore((state) => state.token);
 
-  const searchMovie = async (query: string) => {
+  const [resultList, setResultList] = useState([]);
+  const [keyword, setKeyword] = useState<string>("");
+
+  const getSpotifyToken = async () => {
+    const params = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    });
+
     try {
-      const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}&language=ko-kr`;
-      const response = await axios.get(url);
-      const data = await response.data;
-      setResultList(data.results);
-    } catch (error: any) {
+      const response = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        params.toString(),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      const { access_token: token } = await response.data;
+      console.log(token);
+      setToken(token);
+      return token;
+    } catch (error) {
       console.log(error);
+      return;
     }
   };
 
-  const onClickSearchButton = () => {
-    searchMovie(keyword);
+  const onClickAlbumButton = async (keyword: string) => {
+    const response = await axios.get(
+      `https://api.spotify.com/v1/search?q=${keyword}&type=album`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    console.log(await response);
+
+    const {
+      albums: { items: data },
+    } = await response.data;
+    setResultList(data);
+    console.log(data);
+  };
+
+  const onClickButton = async () => {
+    const data = await getSpotifyToken();
+
+    await onClickAlbumButton(keyword);
   };
 
   const onChangeKeyword = (event: any) => {
@@ -48,29 +87,45 @@ export default function Home() {
         />
         <button
           className="inline-block rounded bg-blue-600 px-6 pb-2 pt-2.5 text-base font-medium uppercase leading-normal text-white"
-          onClick={onClickSearchButton}
+          onClick={onClickButton}
         >
           검색
         </button>
       </div>
       <div className="flex flex-wrap gap-4 container w-fit">
-        {resultList?.map((item, i) => (
-          <div key={i} className="w-[240px]">
-            <div className="w-auto h-[340px] overflow-hidden">
-              <Image
-                src={`https://image.tmdb.org/t/p/w500/${item?.poster_path}`}
-                alt="poster image"
-                width={240}
-                height={360}
-              />
-            </div>
-            <div className="w-auto h-16">
-              <p className="text-center py-4 font-medium text-lg break-all">
-                {item.title}
-              </p>
-            </div>
+        {resultList && (
+          <>
+            {resultList.map((item, i) => (
+              <div key={i} className="w-[280px] text-center space-y-2">
+                <Image
+                  src={item?.images[0].url}
+                  alt="album image"
+                  height={280}
+                  width={280}
+                />
+                <div>{item.name}</div>
+              </div>
+            ))}
+          </>
+        )}
+        {/* {result.images && (
+          <div>
+            <Image
+              src={result.images[0].url}
+              alt="album image"
+              width={300}
+              height={300}
+            />
           </div>
-        ))}
+        )}
+        {result.name && <div>{result.name}</div>}
+        {result.tracks && (
+          <div>
+            {result.tracks.items.map((item, i) => (
+              <li key={i}>{item.name}</li>
+            ))}
+          </div>
+        )} */}
       </div>
     </div>
   );
