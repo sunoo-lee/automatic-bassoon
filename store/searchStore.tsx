@@ -10,7 +10,13 @@ interface SearchSote {
 }
 
 const searchStore = create<SearchSote>((set, get) => ({
-  selectMovie: { poster_path: "", title: "", original_title: "", id: 0 },
+  selectMovie: {
+    poster_path: "",
+    title: "title",
+    original_title: "title",
+    id: 0,
+    release_date: "0000-00-00",
+  },
   movieList: [],
   isPopupOpen: false,
   setMovieList: (data: MovieInfo[]) => {

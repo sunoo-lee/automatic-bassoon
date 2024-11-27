@@ -6,15 +6,14 @@ import React from "react";
 
 interface Props {
   data: MovieInfo;
-  onCardClick: (movieTitle: string) => void;
+  onCardClick: (movieTitle: string, year: string) => void;
 }
 
 const MovieItem = React.memo(function MovieItem({ data, onCardClick }: Props) {
   const togglePopup = searchStore((state) => state.togglePopup);
   const handleClickCard = () => {
-    onCardClick(data.original_title);
+    onCardClick(data.original_title, data.release_date.slice(0, 4));
     togglePopup(true);
-    console.log(data.original_title);
   };
 
   return (
@@ -22,7 +21,7 @@ const MovieItem = React.memo(function MovieItem({ data, onCardClick }: Props) {
       <div className="w-full">
         <div
           onClick={handleClickCard}
-          className=" cursor-pointer bg-gray-800 rounded shadow-md overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+          className="h-full cursor-pointer bg-gray-800 rounded shadow-md overflow-hidden hover:shadow-2xl transition-shadow duration-300"
         >
           {data.poster_path && (
             <Image
@@ -31,7 +30,7 @@ const MovieItem = React.memo(function MovieItem({ data, onCardClick }: Props) {
               className="w-full h-40 md:h-48 object-cover"
               width={500}
               height={192}
-              style={{ width: "auto", height: "auto", objectFit: "cover" }}
+              style={{ width: "auto", height: "100%", objectFit: "cover" }}
             />
           )}
         </div>

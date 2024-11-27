@@ -22,10 +22,9 @@ export const getSpotifyToken = async () => {
     );
 
     const { access_token: token } = await response.data;
-    console.log(await response.data);
+    // console.log(await response.data);
     // console.log(token);
     return token;
-    // setToken(token);
   } catch (error) {
     console.log(error);
     return;

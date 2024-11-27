@@ -10,7 +10,7 @@ interface AlbumStore {
 
 const useAlbumStore = create<AlbumStore>((set, get) => ({
   selectedAlbum: {
-    name: "",
+    name: "결과 없음",
     images: [{ url: "" }],
     artists: [{ name: "" }],
     total_tracks: 0,
@@ -18,7 +18,7 @@ const useAlbumStore = create<AlbumStore>((set, get) => ({
   },
   albumList: [],
   setAlbumList: async (data: MusicInfo[]) => {
-    await set((state) => ({ albumList: data }));
+    set((state) => ({ albumList: data }));
   },
   setAlbum: (data: MusicInfo) => {
     set((state) => ({ selectedAlbum: data }));

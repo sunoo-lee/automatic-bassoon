@@ -1,8 +1,9 @@
 export interface MovieInfo {
-  poster_path: string;
+  id: number;
   title: string;
   original_title: string;
-  id: number;
+  poster_path: string;
+  release_date: string;
 }
 
 export interface MusicInfo {
